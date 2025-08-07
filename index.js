@@ -6,10 +6,11 @@ const {checkLogin,checkRegistration,jwtCheck} = require('./midelware');
 const {init} = require('./model');
 const app = express();
 const PORT = process.env.PORT || 5000;
+const origin = ['http://localhost:5173','https://vlad32-creator.github.io/WebParser/'];
 
 init();
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: origin,
     credentials: true
 }));
 app.use(cookieParser());
