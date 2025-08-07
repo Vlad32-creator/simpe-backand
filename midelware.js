@@ -30,29 +30,28 @@ function signJWT(userName) {
     return token;
 }
 
-
 async function checkRegistration(req, res, next) {
     const allowed = /^[a-zA-Zа-яА-ЯёЁ0-9 _-]+$/;
     const { userName, email, password } = req.body;
-    console.log("userName: ", userName);
-    console.log("email: ", email);
-    console.log("password: ", password);
     const User = getUser();
-    if (
-        !allowed.test(userName) ||
-        !allowed.test(password)
-    ) {
-        return res.send({ Error: 'Expected only letters and numbers' });
-    } if (userName.trim() === '' || email.trim() === '' || password.trim() === '') {
-        return res.send({ Error: 'Fill all fields' })
+    if (!allowed.test(userName) ) {
+        return res.send({ Error: { userName: 'Expected only letters and numbers' }});
+    }if (!allowed.test(password)) {
+        return res.send({ Error: { password: 'Expected only letters and numbers' }});
+    }if (userName.trim() === '') {
+        return res.send({ Error: { userName: 'Fill field' }})
+    }if (email.trim() === '') {
+        return res.sent({Error: {email: "Fill field"}})
+    }if (password.trim() === '') {
+        return res.sent({Error: {password: "Fill field"}})
     }
     const user = await User.findOne({ userName });
     if (user) {
-        return res.send({ Error: 'There is already such a user' });
+        return res.send({ Error: {userName:'There is already such a user' }});
     }
+    
     const hashPassword = await bcrypt.hash(password, 10);
     const token = signJWT(userName);
-    console.log(token);
     await createUser(userName, email, hashPassword, token);
     res.cookie('accessToken', token, {
         httpOnly: true,
@@ -64,9 +63,12 @@ async function checkLogin(req, res) {
     const allowed = /^[a-zA-Zа-яА-ЯёЁ0-9 _-]+$/;
     const { email, password } = req.body;
     const User = getUser();
-    if (!email || !password) {
-        return res.send({ Error: 'Fill all fields' });
-    } if (!allowed.test(password)) {
+    if (!email) {
+        return res.send({ Error: { email: 'Fill field'} });
+    }if (!password) {
+        return res.send({Error: {password:'Fill field'}});
+    }
+     if (!allowed.test(password)) {
         return res.send({ Error: 'Unexpected symbols' });
     }
     const user = await User.findOne({ email });
