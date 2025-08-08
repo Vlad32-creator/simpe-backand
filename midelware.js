@@ -34,20 +34,20 @@ async function checkRegistration(req, res, next) {
     const allowed = /^[a-zA-Zа-яА-ЯёЁ0-9 _-]+$/;
     const { userName, email, password } = req.body;
     const User = getUser();
-    if (!allowed.test(userName) ) {
+    if (userName.trim() === ''|| !userName) {
+        return res.send({ Error: { userName: 'Fill field' }})
+    }if (email.trim() === '' || !email) {
+        return res.sent({Error: {email: "Fill field"}})
+    }if (password.trim() === '' || !password) {
+        return res.sent({Error: {password: "Fill field"}})
+    }if (!allowed.test(userName) ) {
         return res.send({ Error: { userName: 'Expected only letters and numbers' }});
     }if (!allowed.test(password)) {
         return res.send({ Error: { password: 'Expected only letters and numbers' }});
-    }if (userName.trim() === '') {
-        return res.send({ Error: { userName: 'Fill field' }})
-    }if (email.trim() === '') {
-        return res.sent({Error: {email: "Fill field"}})
-    }if (password.trim() === '') {
-        return res.sent({Error: {password: "Fill field"}})
     }
-    const user = await User.findOne({ userName });
+    const user = await User.findOne({ email });
     if (user) {
-        return res.send({ Error: {userName:'There is already such a user' }});
+        return res.send({ Error: {email:'There is already such a user' }});
     }
     
     const hashPassword = await bcrypt.hash(password, 10);
